@@ -29,6 +29,14 @@ public class CharacterInstance
     public void InitializeDeck(List<CardInstance> initialDeck)
     {
         DeckController.InitializeDeck(initialDeck);
+        // 將這個角色綁定為每張卡的擁有者，方便之後在使用卡牌時能找到來源的DeckController等資訊
+        if (initialDeck != null)
+        {
+            foreach (var card in initialDeck)
+            {
+                card.BindCharacterInstance(this);
+            }
+        }
     }
     public void GameStart()
     {

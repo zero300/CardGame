@@ -64,8 +64,6 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     {
         return _cardInstance;
     }
-    
-    
     /// <summary>
     /// 更新卡牌的UI顯示
     /// </summary>
@@ -129,18 +127,15 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         cardObject.transform.localScale = isHandScale ? new Vector3(0.75f, 0.75f, 1) : Vector3.one;
         */
     }
-    
     public void OnBeginDrag(PointerEventData eventData)
     {
         _originalPosition = transform.position; // 記錄原始位置
         _canvasGroup.blocksRaycasts = false;    // 讓滑鼠射線穿透這張卡牌
     }
-
     public void OnDrag(PointerEventData eventData)
     {
         transform.position = Input.mousePosition; // 卡牌跟著滑鼠走
     }
-
     public void OnEndDrag(PointerEventData eventData)
     {
         _canvasGroup.blocksRaycasts = true; // 恢復射線阻擋
@@ -151,8 +146,11 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         if (targetEnemy != null)
         {
             // 點到了！交給 Manager 去判定能不能打出
-            // bool playSuccess = _cardManager.TryPlayCard(this, targetEnemy);
             bool playSuccess = false;
+            if (_cardManager != null)
+            {
+                playSuccess = _cardManager.TryPlayCard(this, targetEnemy);
+            }
             if (!playSuccess)
             {
                 // 如果費用不夠等原因打出失敗，彈回原位
@@ -181,7 +179,6 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
         }
         return null;
     }
-
     private void ReturnToHand()
     {
         transform.position = _originalPosition;

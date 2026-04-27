@@ -59,6 +59,8 @@ public class CardManager
         GameObject cardObject = GameObject.Instantiate(_cardPrefab, HandGameObject.transform);
         CardUI cardUI = cardObject.GetComponent<CardUI>();
         cardUI.BindCardInstance(card);
+        // 綁定 CardManager 以便 CardUI 能呼叫管理器的行為 (例如 TryPlayCard)
+        cardUI.BindCardManager(this);
         _currentHandUI.Add(cardUI); // 將生成的CardUI加入追蹤列表
     }
     public void RemoveCardUI(CardUI cardUI)
@@ -121,8 +123,7 @@ public class CardManager
         // 3. 執行卡牌效果！ (⭐ 這裡就是觸發攻擊的地方)
         foreach (var effect in cardLogic.baseCardData.Effects)
         {
-            // TODO : 
-            // effect.Execute(targetLogic);
+            effect.ExecuteEffect(cardLogic, cardLogic.character, targetLogic);
             // 這裡面就會呼叫 targetLogic.TakeDamage()！
         }
 
