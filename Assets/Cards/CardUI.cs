@@ -1,7 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -11,9 +11,10 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     private Vector2 _originalPosition;
     private CanvasGroup _canvasGroup;
 
+
     #region 方便卡片更新畫面儲存的GameObject 
     // public GameObject 
-    private Transform cardTitle ;
+    private Transform cardTitle;
     private Transform cardBody;
     private Text cardNameText;
     private RawImage cardRarity;
@@ -39,7 +40,7 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
 
         cardTitle = transform.GetChild(0);
         cardBody = transform.GetChild(1);
-        cardNameText = cardTitle.GetChild(0).GetChild(0).GetComponent<Text>() ;
+        cardNameText = cardTitle.GetChild(0).GetChild(0).GetComponent<Text>();
         cardRarity = cardTitle.GetChild(1).GetComponent<RawImage>();
         cardDescriptionText = cardBody.GetChild(1).GetChild(0).GetComponent<Text>();
     }
@@ -64,6 +65,10 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
     {
         return _cardInstance;
     }
+    public CharacterInstance GetCardOwner()
+    {
+        return _cardInstance.Owner;
+    }
     /// <summary>
     /// 更新卡牌的UI顯示
     /// </summary>
@@ -83,7 +88,7 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
             return;
         }
 
-        string queryText = string.Empty ;
+        string queryText = string.Empty;
         // 設置卡牌名稱
         // CardTitle / CardNameImage / CardNameText
         queryText = "CardNameText";
@@ -163,20 +168,50 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
             ReturnToHand();
         }
     }
-    // 偵測滑鼠下方的敵人 (從 UI 螢幕座標轉換到 2D 世界座標)
     private CharacterUI DetectEnemyUnderMouse()
     {
-        // 將滑鼠螢幕座標轉為世界座標
-        Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        // 發射一條 2D 射線
-        RaycastHit2D hit = Physics2D.Raycast(mouseWorldPos, Vector2.zero);
-
-        if (hit.collider != null)
+        if (EventSystem.current == null)
         {
-            // 看看撞到的物件身上有沒有 CharacterUI
-            return hit.collider.GetComponent<CharacterUI>();
+            Debug.LogWarning("DetectEnemyUnderMouse: EventSystem.current is null.");
+            return null;
         }
+
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        List<RaycastResult> raycastResults = new List<RaycastResult>();
+        GraphicRaycaster raycaster = GetComponentInParent<GraphicRaycaster>();
+
+        if (raycaster == null)
+        {
+            Debug.LogWarning("DetectEnemyUnderMouse: 找不到 GraphicRaycaster。");
+            return null;
+        }
+
+        raycaster.Raycast(pointerData, raycastResults);
+
+        // 遍歷所有 raycast 結果，優先找直接的 CharacterUI
+        foreach (var result in raycastResults)
+        {
+            CharacterUI characterUI = result.gameObject.GetComponent<CharacterUI>();
+            if (characterUI != null)
+            {
+                return characterUI;
+            }
+        }
+
+        // 如果沒有直接找到，查找父物件
+        foreach (var result in raycastResults)
+        {
+            CharacterUI characterUI = result.gameObject.GetComponentInParent<CharacterUI>();
+            if (characterUI != null)
+            {
+                return characterUI;
+            }
+        }
+
         return null;
     }
     private void ReturnToHand()

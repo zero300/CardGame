@@ -11,8 +11,8 @@ public class CardInstance
     /// <summary>
     /// 當前所需費用，因可能因為其他效果改變
     /// </summary>
-    public int currentCost;
-    public CharacterInstance character;
+    public int CurrentCost;
+    public CharacterInstance Owner;
     public GameObject cardObject;
     public CardInstance(CardData cardData) 
     {
@@ -24,7 +24,7 @@ public class CardInstance
     }
     public void BindCharacterInstance(CharacterInstance Character)
     {
-        this.character = Character;
+        this.Owner = Character;
     }
     /// <summary>
     /// 判斷是否可以將此卡打出
@@ -36,7 +36,6 @@ public class CardInstance
         // 例子：檢查玩家是否有足夠的資源來打出這張卡
         return true;
     }
-
     /// <summary>
     /// 當此卡被從卡堆中抽出時，執行的函式
     /// </summary>

@@ -33,7 +33,7 @@ public class DeckController
     public void DeckRemoveCard(CardInstance card)
     {
         Deck.Remove(card);
-    }  
+    }
     /// <summary>
     /// 抽卡
     /// </summary>
@@ -95,7 +95,49 @@ public class DeckController
             discard.OnDiscarded();
         }
     }
+    /// <summary>
+    /// Move card to its post-use destination according to CardData.PostUse.
+    /// DeckController 負責集合的實際移動，確保一致性。
+    /// </summary>
+    public void MoveToPostUse(CardInstance card)
+    {
+        if (card == null) return;
 
+        // 若仍在手牌，先移除（防重複）
+        if (HandCards.Contains(card))
+        {
+            HandCards.Remove(card);
+        }
+
+        var action = card.baseCardData != null ? card.baseCardData.PostUseAction : PostUseAction.Discard;
+
+        // Call discard hooks for both discard and exhaust for now.
+        switch (action)
+        {
+            // Discard 將其從手牌後，放入DiscardCards
+            case PostUseAction.Discard:
+                card.OnDiscarding();
+                DiscardCards.Add(card);
+                card.OnDiscarded();
+                break;
+            // Exhaust 將其從手牌後，放入DeleteCards，表示該牌已被消耗，此場戰鬥無法再使用
+            case PostUseAction.Exhaust:
+                card.OnDiscarding();
+                DeleteCards.Add(card);
+                card.OnDiscarded();
+                break;
+            // RemoveFromGame 將其從手牌移除後，不放入任何牌堆，等同於直接從遊戲中刪除
+            case PostUseAction.RemoveFromGame:
+                break;
+            // 同 Discard
+            default:
+                // fallback to discard
+                card.OnDiscarding();
+                DiscardCards.Add(card);
+                card.OnDiscarded();
+                break;
+        }
+    }
     /// <summary>
     /// 洗牌，將棄牌堆洗回抽牌堆
     /// </summary>

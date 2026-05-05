@@ -1,25 +1,46 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CharacterUI : MonoBehaviour
 {
     [Header("UI 參考")]
-    public TextMeshProUGUI hpText;
-    public TextMeshProUGUI blockText;
-    public GameObject blockIcon; // 護甲圖標，沒護甲時隱藏
+    public Text HpText;
+    public Text BlockText;
     public Image characterImage;
+    public Text NameText;
+    public GameObject blockIcon; // 護甲圖標，沒護甲時隱藏
 
     private CharacterInstance _characterInstance;
 
+    private void Awake()
+    {
+        // 確保有 CanvasGroup 用於互動控制
+        CanvasGroup canvasGroup = GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            gameObject.AddComponent<CanvasGroup>();
+        }
+    }
     public void Setup(CharacterInstance instance)
     {
         _characterInstance = instance;
+        // 初始化 UI 顯示，這裡假設 CharacterData 有 CharacterName 和 CharacterSprite 屬性
+        if (_characterInstance == null || _characterInstance.characterData == null)
+        {
+            Debug.LogWarning("CharacterUI: 傳入的 CharacterInstance 或其 CharacterData 為 null，無法初始化 UI");
+            return;
+        }
+        // 初始獲取UI位址資料
+        HpText = transform.Find("HpText").GetComponent<Text>();
+        NameText = transform.Find("NameText").GetComponent<Text>();
+        BlockText = transform.Find("BlockText").GetComponent<Text>();
+        characterImage = transform.Find("CharacterImage").GetComponent<Image>();
 
         // 初始化基本資料  sprite 先不設定
         // characterImage.sprite = _characterInstance.characterData.CharacterSprite;
         UpdateHPUI(_characterInstance.CurrentHP, _characterInstance.characterData.MaxHP);
         UpdateBlockUI(_characterInstance.CurrentBlock);
+        NameText.text = _characterInstance.characterData.CharacterName;
 
         // 訂閱事件
         _characterInstance.OnHPChanged += UpdateHPUI;
@@ -44,15 +65,13 @@ public class CharacterUI : MonoBehaviour
     }
     private void UpdateHPUI(int currentHP, int maxHP)
     {
-        hpText.text = $"{currentHP} / {maxHP}";
+        HpText.text = $"{currentHP} / {maxHP}";
     }
-
     private void UpdateBlockUI(int currentBlock)
     {
-        blockText.text = currentBlock.ToString();
-        blockIcon.SetActive(currentBlock > 0); // 只有數值 > 0 時才顯示護甲圖示
+        BlockText.text = currentBlock.ToString();
+        // blockIcon.SetActive(currentBlock > 0); // 只有數值 > 0 時才顯示護甲圖示
     }
-
     private void PlayHitAnimation(int damageTaken)
     {
         Debug.Log($"{_characterInstance.characterData.CharacterName} 受到了 {damageTaken} 點傷害！");

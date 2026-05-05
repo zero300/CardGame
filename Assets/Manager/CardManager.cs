@@ -112,24 +112,25 @@ public class CardManager
     public bool TryPlayCard(CardUI cardUI, CharacterUI targetUI)
     {
         CardInstance cardLogic = cardUI.GetCardInstance();
+        CharacterInstance cardOwner = cardUI.GetCardOwner();
         CharacterInstance targetLogic = targetUI.GetCharacterInstance();
 
         // 1. 條件檢查：判斷費用夠不夠？(這裡假設你有個玩家的 PlayerInstance 記錄費用)
-        // if (PlayerInstance.CurrentEnergy < cardLogic.CurrentCost) return false;
+        if (cardOwner.CurrentEnergy < cardLogic.CurrentCost) return false;
 
         // 2. 扣除費用
-        // PlayerInstance.ConsumeEnergy(cardLogic.CurrentCost);
+        cardOwner.ConsumeEnergy(cardLogic.CurrentCost);
 
         // 3. 執行卡牌效果！ (⭐ 這裡就是觸發攻擊的地方)
         foreach (var effect in cardLogic.baseCardData.Effects)
         {
-            effect.ExecuteEffect(cardLogic, cardLogic.character, targetLogic);
-            // 這裡面就會呼叫 targetLogic.TakeDamage()！
+            // 裡面會觸發卡牌邏輯
+            effect.ExecuteEffect(cardLogic, cardOwner, targetLogic);
         }
 
-        // 4. 處理卡牌去向 (從手牌移除，放入棄牌堆)
-        // PlayerInstance.MyDeck.HandCards.Remove(cardLogic);
-        // PlayerInstance.MyDeck.DiscardPile.Add(cardLogic);
+        // 4. 處理卡牌去向 (從手牌移除，放入棄牌堆或消耗區)
+        // 由 DeckController 根據 CardData.PostUse 來決定並執行移動
+        cardOwner.MoveToPostUse(cardLogic);
 
         // 5. 銷毀 UI
         RemoveCardUI(cardUI);

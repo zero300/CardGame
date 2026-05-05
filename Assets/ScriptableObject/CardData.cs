@@ -22,6 +22,16 @@ public enum CardType
     Field,      // 場地
     Curse       // 詛咒
 }
+/// <summary>
+/// 打出後卡片去向（用於 Data 驅動）
+/// </summary>
+public enum PostUseAction
+{
+    Discard,        // 放入棄牌堆（預設）
+    Exhaust,        // 消耗/移出遊戲（放入 Delete/Exhaust 區）
+    RemoveFromGame  // 直接移除（行為上與 Exhaust 類似，但語意不同）
+}
+
 [CreateAssetMenu(fileName = "CardData", menuName = "Games/CardData")]
 public class CardData : ScriptableObject
 {
@@ -32,12 +42,7 @@ public class CardData : ScriptableObject
     public int Cost; // 卡牌消耗
     public CardType Type; // 卡牌類型
     public CardRarity Rarity; // 卡牌稀有度
-    
-    // 造成的基礎數值
-    public int BaseDamage; // 基礎傷害
-    public int BaseHealth; // 基礎回復
-    public int BaseShield; // 基礎護甲值 
-
+    public PostUseAction PostUseAction; // 打出後卡片去向
     // 存放效果列表
     [SerializeReference]
     public List<ICardEffect> Effects = new List<ICardEffect>();

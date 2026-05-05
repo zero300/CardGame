@@ -18,10 +18,13 @@ MonoBehaviour:
   Cost: 1
   Type: 1
   Rarity: 0
-  BaseDamage: 0
-  BaseHealth: 0
-  BaseShield: 6
-  Effects: []
+  PostUseAction: 0
+  Effects:
+  - rid: 4499563969219133512
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 4499563969219133512
+      type: {class: ShieldEffect, ns: , asm: Assembly-CSharp}
+      data:
+        shield: 5

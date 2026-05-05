@@ -9,32 +9,40 @@ public class GameManager : MonoBehaviour
     private static GameManager _instance;
     public static GameManager Instance
     {
-        get 
+        get
         {
-            if(_instance == null)
+            if (_instance == null)
             {
                 CreateInstanceObject();
-            }   
-            return _instance; 
+            }
+            return _instance;
         }
     }
 
     public GameObject baseCanvas;
+    public Transform GamePanel;
+    [Header("卡牌相關")]
     /// <summary>
     /// 卡牌Prefab
     /// </summary> 
-    public  GameObject cardPrefab; // 這裡假設你有一個卡牌的預製體
+    public GameObject cardPrefab; // 這裡假設你有一個卡牌的預製體
 
     private CardManager cardManager;
     /// <summary>
     /// 手牌之間的間距，單位為像素，可以根據需要調整
     /// </summary>
     public float handCardSpacing = 70f;
+    [Header("測試使用按鈕")]
     public Button StartButton; // 這裡假設你有一個開始遊戲的按鈕
-    public Button DrawButton; 
+    public Button DrawButton;
     public Button TurnEndButton;
+    public Button EnemyGenerateButton;
 
-    public CharacterInstance Player ;
+    [Header("角色UI相關")]
+    public GameObject enemyCharacterUIPrefab;
+    public CharacterManager characterManager;
+
+    public CharacterInstance Player;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -47,18 +55,30 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        _instance = this ;
+        _instance = this;
         DontDestroyOnLoad(gameObject);
 
         // 初始化Manager 
         cardManager = new CardManager(Instance, cardPrefab);
 
+        if (GamePanel == null && baseCanvas != null)
+        {
+            GamePanel = baseCanvas.transform.Find("GamePanel");
+            if (GamePanel == null)
+            {
+                Debug.LogWarning("GameManager: 無法在 baseCanvas 下找到 GamePanel enemyParent");
+            }
+        }
+
+        characterManager = new CharacterManager(Instance, enemyCharacterUIPrefab, GamePanel);
+
         // TEST:簡單賦予點擊事件
-        StartButton?.onClick.AddListener(StartButtonOnClick) ; // 為按鈕添加點擊事件
+        StartButton?.onClick.AddListener(StartButtonOnClick); // 為按鈕添加點擊事件
         DrawButton?.onClick.AddListener(DrawButtonOnClick); // 為按鈕添加點擊事件
         TurnEndButton?.onClick.AddListener(TurnEndButtonOnClick); // 為按鈕添加點擊事件
+        EnemyGenerateButton?.onClick.AddListener(EnemyGenerateButtonOnClick); // 為按鈕添加點擊事件
 
-        Player = new CharacterInstance(); // 假設你有一個CharacterInstance類別，這裡創建一個玩家角色
+        Player = characterManager.CreateCharacter("Player"); // 假設你有一個CharacterInstance類別，這裡創建一個玩家角色
         cardManager.BindDeckControllerOnDraw(Player.DeckController); // 綁定抽牌事件
     }
     void OnDestroy()
@@ -84,6 +104,10 @@ public class GameManager : MonoBehaviour
         {
             cardManager.GenerateCardByString("BaseAttack"),
             cardManager.GenerateCardByString("BaseAttack"),
+            cardManager.GenerateCardByString("BaseAttack"),
+            cardManager.GenerateCardByString("BaseAttack"),
+            cardManager.GenerateCardByString("BaseShield"),
+            cardManager.GenerateCardByString("BaseShield"),
             cardManager.GenerateCardByString("BaseShield"),
             cardManager.GenerateCardByString("BaseShield")
         };
@@ -97,5 +121,20 @@ public class GameManager : MonoBehaviour
     private void TurnEndButtonOnClick()
     {
         Debug.Log("結束回合");
+    }
+    public void EnemyGenerateButtonOnClick()
+    {
+        Debug.Log("生成敵人");
+        if (characterManager == null)
+        {
+            Debug.LogWarning("GameManager: CharacterManager 尚未初始化");
+            return;
+        }
+
+        CharacterInstance enemy = characterManager.CreateCharacter("Enemy1");
+        if (enemy != null)
+        {
+            characterManager.CreateCharacterUI(enemy);
+        }
     }
 }

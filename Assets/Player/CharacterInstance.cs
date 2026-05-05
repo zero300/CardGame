@@ -5,23 +5,37 @@ using UnityEngine;
 
 public class CharacterInstance
 {
-    public CharacterData characterData { get; private set; } 
+    public CharacterData characterData { get; private set; }
     public int CurrentHP;
     public int CurrentBlock;
-    public int Mana;
-    public int MaxMana;
+    public int MaxEnergy;
+    public int CurrentEnergy;
     public int drawCount = 5;
-    public int MaxHands = 10 ;
+    public int MaxHands = 10;
 
     private DeckController _deckController = new DeckController();
-    public DeckController DeckController {  get { return _deckController; } }
+    public DeckController DeckController { get { return _deckController; } }
 
     // 宣告事件，讓 UI 監聽
     public event Action<int, int> OnHPChanged;    // 傳遞: 當前HP, 最大HP
     public event Action<int> OnBlockChanged;      // 傳遞: 當前護甲
     public event Action<int> OnDamageTaken;       // 傳遞: 實際造成的HP傷害 (用來跳傷害數字)
+    public event Action<int> OnEnergyChanged;     // 傳遞: 當前
     public event Action OnDeath;
+    public CharacterInstance(CharacterData data)
+    {
+        if (data == null)
+        {
+            Debug.LogWarning("CharacterInstance: 傳入的 CharacterData 為 null");
+            return;
+        }
 
+        characterData = data;
+        CurrentHP = data.MaxHP;
+        CurrentBlock = 0;
+        MaxEnergy = data.BaseEnergy;
+        CurrentEnergy = data.BaseEnergy;
+    }
     /// <summary>
     /// 初始化卡牌
     /// </summary>
@@ -49,9 +63,24 @@ public class CharacterInstance
         // TODO : 執行回合結束的相關邏輯，例如重置玩家狀態、觸發回合結束事件等
         DeckController.TurnEnd();
     }
-
+    public void MoveToPostUse(CardInstance card)
+    {
+        _deckController.MoveToPostUse(card);
+    }
+    public void ConsumeEnergy(int _consumnEnergy)
+    {
+        CurrentEnergy -= _consumnEnergy;
+        if (CurrentEnergy < 0) CurrentEnergy = 0;
+        // TODO : 可以在這裡觸發能量變化的事件，讓UI更新能量顯示等
+        OnEnergyChanged?.Invoke(CurrentEnergy);
+    }
+    /// <summary>
+    /// 受傷邏輯
+    /// </summary>
+    /// <param name="damageAmount"></param>
     public void TakeDamage(int damageAmount)
     {
+        Debug.Log($"CharacterInstance: {characterData.CharacterName} 受到傷害 => {damageAmount}");
         if (damageAmount <= 0) return;
 
         int actualHPDamage = 0;
