@@ -154,7 +154,7 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
             bool playSuccess = false;
             if (_cardManager != null)
             {
-                playSuccess = _cardManager.TryPlayCard(this, targetEnemy);
+                playSuccess = _cardManager.TryPlayCard(_cardInstance, targetEnemy);
             }
             if (!playSuccess)
             {
@@ -211,7 +211,8 @@ public class CardUI : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHa
                 return characterUI;
             }
         }
-
+        // 為何沒有找到？
+        Debug.LogWarning("DetectEnemyUnderMouse: 沒有找到敵人 UI。");
         return null;
     }
     private void ReturnToHand()

@@ -5,19 +5,17 @@ public class CharacterManager
 {
     private const string ResourcePath = "CharacterDatas/";
 
-    private readonly GameManager _gameManager;
     private readonly GameObject _characterUIPrefab;
     private readonly Transform _playerParent;
     private readonly Transform _enemyParent;
 
     private readonly List<CharacterInstance> _characters = new List<CharacterInstance>();
 
-    public CharacterManager(GameManager gameManager, GameObject characterUIPrefab, Transform GamePanel)
+    public CharacterManager(GameObject characterUIPrefab, Transform gamePanel)
     {
-        _gameManager = gameManager;
         _characterUIPrefab = characterUIPrefab;
-        _playerParent = GamePanel.Find("PlayerSpace");
-        _enemyParent = GamePanel.Find("EnemySpace");
+        _playerParent = gamePanel?.Find("PlayerSpace");
+        _enemyParent = gamePanel?.Find("EnemySpace");
 
         // 警告用
         if (_playerParent == null)
@@ -83,7 +81,12 @@ public class CharacterManager
 
         characterUI.Setup(characterInstance);
     }
-    // TODO : 可以在這裡添加一些管理角色的其他方法，例如移除角色、獲取所有角色列表等
-    // TODO : 可以考慮添加一些事件，例如角色死亡事件，讓其他系統能夠訂閱並做出反應
-    // TODO : 處理生成角色UI時的排序問題，例如玩家角色固定在左邊，敵人角色依次排列在右邊等
+    public void RemoveCharacter(CharacterInstance character)
+    {
+        _characters.Remove(character);
+    }
+    public List<CharacterInstance> GetAliveEnemies()
+    {
+        return _characters.FindAll(c => c.EnemyController != null && c.CurrentHP > 0);
+    }
 }

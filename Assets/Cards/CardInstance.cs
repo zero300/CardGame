@@ -7,16 +7,17 @@ using UnityEngine;
 public class CardInstance
 {
     // 卡片基礎屬性
-    public CardData baseCardData ;
+    public CardData baseCardData;
     /// <summary>
     /// 當前所需費用，因可能因為其他效果改變
     /// </summary>
     public int CurrentCost;
     public CharacterInstance Owner;
     public GameObject cardObject;
-    public CardInstance(CardData cardData) 
+    public CardInstance(CardData cardData)
     {
         baseCardData = cardData;
+        CurrentCost = cardData.Cost;
     }
     public void BindCardObject(GameObject cardObject)
     {
@@ -46,7 +47,7 @@ public class CardInstance
     /// <summary>
     /// 當此卡被從卡堆中抽出後，所執行的函式
     /// </summary>
-    public virtual void OnDrawed() 
+    public virtual void OnDrawed()
     {
         Debug.Log($"已經抽到卡牌: {baseCardData.Name}");
     }
@@ -78,7 +79,7 @@ public class CardInstance
     {
         Debug.Log($"捨棄卡牌後: {baseCardData.Name}");
     }
-    
+
     #region Override Function 
     public override string ToString()
     {

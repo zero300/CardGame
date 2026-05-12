@@ -13,6 +13,7 @@ public class CharacterInstance
     public int drawCount = 5;
     public int MaxHands = 10;
 
+    public IEnemyController EnemyController { get; set; }
     private DeckController _deckController = new DeckController();
     public DeckController DeckController { get { return _deckController; } }
 
@@ -52,15 +53,23 @@ public class CharacterInstance
             }
         }
     }
-    public void GameStart()
+    public void BattleStart()
     {
-        DeckController.GameStart(drawCount); // 假設遊戲開始時抽取初始張數
-        // TODO : 可以在這裡添加一些遊戲開始時的邏輯，例如抽取初始手牌、觸發遊戲開始事件等
-        // 或是在DeckController進行
+        DeckController.BattleStart();
+    }
+    public void TurnStart()
+    {
+        ClearBlock();
+        ResetEnergy();
+        DeckController.DrawCard(drawCount);
+    }
+    public void ResetEnergy()
+    {
+        CurrentEnergy = MaxEnergy;
+        OnEnergyChanged?.Invoke(CurrentEnergy);
     }
     public void TurnEnd()
     {
-        // TODO : 執行回合結束的相關邏輯，例如重置玩家狀態、觸發回合結束事件等
         DeckController.TurnEnd();
     }
     public void MoveToPostUse(CardInstance card)

@@ -15,16 +15,17 @@ public class DeckController
 
     // 宣告一個事件：當卡牌被抽到時觸發，並傳遞那張卡的實體
     public event Action<CardInstance> OnCardDrawn;
+    // 宣告一個事件：當卡牌使用後、回合結束手牌清理時觸發，並傳遞那張卡的實體
+    // HandCards -> DiscardCards、DeleteCards時觸發
+    public event Action<CardInstance> OnCardDiscard;
 
     public void InitializeDeck(List<CardInstance> initialDeck)
     {
         Deck.AddRange(initialDeck);
     }
-    public void GameStart(int initialCount)
+    public void BattleStart()
     {
         DrawCards.AddRange(Deck);
-        DrawCard(initialCount); // 假設遊戲開始時抽取初始張數
-        // TODO : 可以在這裡添加一些遊戲開始時的邏輯，例如抽取初始手牌、觸發遊戲開始事件等
     }
     public void DeckAddCard(CardInstance card)
     {
@@ -84,15 +85,9 @@ public class DeckController
         for (int i = HandCards.Count - 1; i >= 0; i--)
         {
             CardInstance discard = HandCards[i];
-            // TODO : 虛無效果，當回合結束時，手牌中的牌會被丟棄
-
             // TODO : 保留效果，當回合結束時，手牌中的牌會保留到下一回合
-
             // 正常效果，當回合結束時，手牌中的牌會被丟棄
-            discard.OnDiscarding();
-            HandCards.RemoveAt(i);
-            DiscardCards.Add(discard);
-            discard.OnDiscarded();
+            MoveToPostUse(discard);
         }
     }
     /// <summary>
@@ -117,12 +112,14 @@ public class DeckController
             // Discard 將其從手牌後，放入DiscardCards
             case PostUseAction.Discard:
                 card.OnDiscarding();
+                OnCardDiscard?.Invoke(card);
                 DiscardCards.Add(card);
                 card.OnDiscarded();
                 break;
             // Exhaust 將其從手牌後，放入DeleteCards，表示該牌已被消耗，此場戰鬥無法再使用
             case PostUseAction.Exhaust:
                 card.OnDiscarding();
+                OnCardDiscard?.Invoke(card);
                 DeleteCards.Add(card);
                 card.OnDiscarded();
                 break;
@@ -133,6 +130,7 @@ public class DeckController
             default:
                 // fallback to discard
                 card.OnDiscarding();
+                OnCardDiscard?.Invoke(card);
                 DiscardCards.Add(card);
                 card.OnDiscarded();
                 break;

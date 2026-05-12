@@ -74,16 +74,16 @@ public class CharacterUI : MonoBehaviour
     }
     private void PlayHitAnimation(int damageTaken)
     {
-        Debug.Log($"{_characterInstance.characterData.CharacterName} 受到了 {damageTaken} 點傷害！");
+        Debug.Log($"CharacterUI : {_characterInstance.characterData.CharacterName} 受到了 {damageTaken} 點傷害！");
         // 這裡可以加入：
         // 1. 角色閃爍紅光
         // 2. 螢幕震動
         // 3. 生成浮動傷害數字 (Floating Text)
     }
-
     private void PlayDeathAnimation()
     {
-        Debug.Log($"{_characterInstance.characterData.CharacterName} 死亡！");
+        Debug.Log($"CharacterUI : {_characterInstance.characterData.CharacterName} 死亡！");
         // 處理死亡動畫或隱藏物件
+        Destroy(gameObject);
     }
 }
