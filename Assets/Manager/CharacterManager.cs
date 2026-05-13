@@ -85,6 +85,17 @@ public class CharacterManager
     {
         _characters.Remove(character);
     }
+
+    public void CleanupEnemies()
+    {
+        _characters.RemoveAll(c => c.EnemyController != null);
+
+        if (_enemyParent != null)
+        {
+            foreach (Transform child in _enemyParent)
+                GameObject.Destroy(child.gameObject);
+        }
+    }
     public List<CharacterInstance> GetAliveEnemies()
     {
         return _characters.FindAll(c => c.EnemyController != null && c.CurrentHP > 0);

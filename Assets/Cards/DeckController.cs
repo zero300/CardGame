@@ -21,11 +21,31 @@ public class DeckController
 
     public void InitializeDeck(List<CardInstance> initialDeck)
     {
+        Deck.Clear();
         Deck.AddRange(initialDeck);
     }
+
     public void BattleStart()
     {
+        // Discard any remaining hand cards (fires events so CardManager cleans up UI)
+        for (int i = HandCards.Count - 1; i >= 0; i--)
+        {
+            var card = HandCards[i];
+            HandCards.RemoveAt(i);
+            OnCardDiscard?.Invoke(card);
+        }
+
+        DrawCards.Clear();
+        DiscardCards.Clear();
+        DeleteCards.Clear();
         DrawCards.AddRange(Deck);
+
+        // Shuffle the draw pile at battle start
+        for (int i = DrawCards.Count - 1; i > 0; i--)
+        {
+            int j = UnityEngine.Random.Range(0, i + 1);
+            (DrawCards[i], DrawCards[j]) = (DrawCards[j], DrawCards[i]);
+        }
     }
     public void DeckAddCard(CardInstance card)
     {

@@ -61,39 +61,38 @@ public class Bootstrapper : MonoBehaviour
 
     private void InitialManager()
     {
-        // BattleManager
+        // 1. BattleManager
         GameObject bmGo = new GameObject("BattleManager");
         IBattleManager battleManager = bmGo.AddComponent<BattleManager>();
         DontDestroyOnLoad(bmGo);
         ServiceLocator.Instance.Register<IBattleManager>(battleManager);
 
-        // UIManager — receives all panel refs from Inspector
+        // 2. UIManager
         var uiManager = new UIManager(mapPanel, GamePanel?.gameObject, victoryPanel, defeatPanel, restPanel, stubPanel);
         ServiceLocator.Instance.Register(uiManager);
 
-        // MapManager — must be created before RunManager so Initialize can subscribe
+        // 3. MapManager
         var mapManager = new MapManager(mapLayoutData);
         ServiceLocator.Instance.Register(mapManager);
 
-        // RunManager — subscribes to BattleManager.OnBattleEnd and MapManager.OnNodeSelected
-        var runManager = new RunManager();
-        runManager.Initialize(battleManager, mapManager);
-        ServiceLocator.Instance.Register(runManager);
-
-        // EventManager (Slice 2 stub; Slices 3-5 fill in real dispatch)
-        var eventManager = new EventManager();
-        ServiceLocator.Instance.Register(eventManager);
-
-        // CardManager
+        // 4. CardManager
         var cardManager = new CardManager(cardPrefab, handCardSpacing, baseCanvas);
         ServiceLocator.Instance.Register(cardManager);
 
-        // CharacterManager
+        // 5. CharacterManager + LocalPlayer (must be before RunManager.Initialize)
         var characterManager = new CharacterManager(enemyCharacterUIPrefab, GamePanel);
         ServiceLocator.Instance.Register(characterManager);
-
         LocalPlayer = characterManager.CreateCharacter("Player");
         characterManager.CreateCharacterUI(LocalPlayer, isEnemy: false);
+
+        // 6. RunManager — subscribes to battle/map events, holds LocalPlayer reference
+        var runManager = new RunManager();
+        runManager.Initialize(battleManager, mapManager, LocalPlayer);
+        ServiceLocator.Instance.Register(runManager);
+
+        // 7. EventManager
+        var eventManager = new EventManager();
+        ServiceLocator.Instance.Register(eventManager);
     }
 
     void OnDestroy()
@@ -105,9 +104,28 @@ public class Bootstrapper : MonoBehaviour
 
     private void OnStartRunButtonClicked()
     {
-        ServiceLocator.Instance.Get<RunManager>()?.StartRun();
+        var cardManager = ServiceLocator.Instance.Get<CardManager>();
+        var runManager = ServiceLocator.Instance.Get<RunManager>();
+
+        // Build the starting deck for this Run
+        var deck = new List<CardInstance>
+        {
+            cardManager.GenerateCardByString("BaseAttack"),
+            cardManager.GenerateCardByString("BaseAttack"),
+            cardManager.GenerateCardByString("BaseAttack"),
+            cardManager.GenerateCardByString("BaseAttack"),
+            cardManager.GenerateCardByString("BaseShield"),
+            cardManager.GenerateCardByString("BaseShield"),
+            cardManager.GenerateCardByString("BaseShield"),
+            cardManager.GenerateCardByString("BaseShield"),
+        };
+        LocalPlayer.InitializeDeck(deck);
+        LocalPlayer.ResetHP();
+
+        runManager?.StartRun();
     }
 
+    // Kept for direct battle testing without the map flow
     private void OnStartButtonClicked()
     {
         var cardManager = ServiceLocator.Instance.Get<CardManager>();
@@ -117,7 +135,6 @@ public class Bootstrapper : MonoBehaviour
 
         runManager?.SetMode(RunMode.Battle);
 
-        // TODO: 等到有選單系統後，應改成根據玩家選擇的角色來生成卡組和敵人
         var deck = new List<CardInstance>
         {
             cardManager.GenerateCardByString("BaseAttack"),

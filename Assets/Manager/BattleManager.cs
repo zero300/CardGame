@@ -20,6 +20,10 @@ public class BattleManager : MonoBehaviour, IBattleManager
 
     public void StartBattle(CharacterInstance player, List<CharacterInstance> enemies)
     {
+        // Unsubscribe previous LocalPlayer to prevent accumulation across battles
+        if (_localPlayer != null)
+            _localPlayer.OnDeath -= OnLocalPlayerDeath;
+
         _localPlayer = player;
         _enemies = enemies;
         _state = BattleState.Setup;
@@ -29,7 +33,7 @@ public class BattleManager : MonoBehaviour, IBattleManager
         foreach (var enemy in _enemies)
         {
             var captured = enemy;
-            enemy.OnDeath += () => OnEnemyDeath(enemy);
+            enemy.OnDeath += () => OnEnemyDeath(captured);
         }
 
         ServiceLocator.Instance.Get<CardManager>().BindLocalPlayerHand(player);

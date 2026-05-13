@@ -2,23 +2,25 @@ public class RunManager
 {
     public RunMode CurrentMode { get; private set; }
     public RunState RunState { get; private set; } = new();
+    public CharacterInstance LocalPlayer { get; private set; }
 
     private MapManager _mapManager;
-    public MapManager MapManager { get { return _mapManager; } }
+    public MapManager MapManager => _mapManager;
     private UIManager _uiManager;
-    public UIManager UIManager { get { return _uiManager; } }
+    public UIManager UIManager => _uiManager;
 
-    public void Initialize(IBattleManager battleManager, MapManager mapManager)
+    public void Initialize(IBattleManager battleManager, MapManager mapManager, CharacterInstance localPlayer)
     {
         battleManager.OnBattleEnd += HandleBattleEnd;
         mapManager.OnNodeSelected += HandleNodeSelected;
         _mapManager = mapManager;
         _uiManager = ServiceLocator.Instance.Get<UIManager>();
+        LocalPlayer = localPlayer;
     }
 
     public void StartRun()
     {
-        RunState ??= new RunState();
+        RunState = new RunState();
         _mapManager?.GenerateMap();
         SetMode(RunMode.MapView);
     }
@@ -31,6 +33,8 @@ public class RunManager
 
     private void HandleBattleEnd(BattleResult result)
     {
+        ServiceLocator.Instance.Get<CharacterManager>()?.CleanupEnemies();
+
         if (result == BattleResult.Victory)
         {
             _mapManager?.CompleteCurrentNode(RunState.CurrentNodeId);

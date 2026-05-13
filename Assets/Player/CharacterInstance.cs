@@ -53,6 +53,12 @@ public class CharacterInstance
             }
         }
     }
+    public void ResetHP()
+    {
+        CurrentHP = characterData.MaxHP;
+        OnHPChanged?.Invoke(CurrentHP, characterData.MaxHP);
+    }
+
     public void BattleStart()
     {
         DeckController.BattleStart();
