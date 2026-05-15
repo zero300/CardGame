@@ -88,7 +88,12 @@ public class MapManager
         if (!_nodes.TryGetValue(nodeId, out var node)) return;
 
         node.State = NodeState.Visited;
+        // 將同一層的其他Node設為不可達，因為只能選一條路線走
+        foreach (var n in _floors[node.Floor])
+            if (n.Id != nodeId && n.State == NodeState.Reachable)
+                n.State = NodeState.Unreachable;
 
+        // 將該Node可走路線開啟
         foreach (var nextId in node.NextNodeIds)
             if (_nodes.TryGetValue(nextId, out var next) && next.State == NodeState.Unreachable)
                 next.State = NodeState.Reachable;

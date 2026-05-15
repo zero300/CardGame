@@ -19,6 +19,7 @@ MonoBehaviour:
   Type: 1
   Rarity: 0
   PostUseAction: 0
+  CanUpgrade: 1
   Effects:
   - rid: 4499563969219133442
   references:
@@ -28,3 +29,4 @@ MonoBehaviour:
       type: {class: DamageEffect, ns: , asm: Assembly-CSharp}
       data:
         damage: 5
+        upgradedDamage: 7

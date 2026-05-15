@@ -19,6 +19,7 @@ MonoBehaviour:
   Type: 1
   Rarity: 0
   PostUseAction: 0
+  CanUpgrade: 1
   Effects:
   - rid: 4499563969219133512
   references:
@@ -28,3 +29,4 @@ MonoBehaviour:
       type: {class: ShieldEffect, ns: , asm: Assembly-CSharp}
       data:
         shield: 5
+        upgradedShield: 7
