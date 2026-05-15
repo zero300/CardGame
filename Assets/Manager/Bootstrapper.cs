@@ -85,14 +85,14 @@ public class Bootstrapper : MonoBehaviour
         LocalPlayer = characterManager.CreateCharacter("Player");
         characterManager.CreateCharacterUI(LocalPlayer, isEnemy: false);
 
-        // 6. RunManager — subscribes to battle/map events, holds LocalPlayer reference
-        var runManager = new RunManager();
-        runManager.Initialize(battleManager, mapManager, LocalPlayer);
-        ServiceLocator.Instance.Register(runManager);
-
-        // 7. EventManager
+        // 6. EventManager (must be before RunManager so it can be passed to Initialize)
         var eventManager = new EventManager();
         ServiceLocator.Instance.Register(eventManager);
+
+        // 7. RunManager — subscribes to battle/map/event events, holds LocalPlayer reference
+        var runManager = new RunManager();
+        runManager.Initialize(battleManager, mapManager, LocalPlayer, eventManager);
+        ServiceLocator.Instance.Register(runManager);
     }
 
     void OnDestroy()

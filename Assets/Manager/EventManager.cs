@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class EventManager
 {
+    public event Action OnEventCompleted;
+
     public void HandleNodeEntered(string nodeId)
     {
         var mapManager = ServiceLocator.Instance.Get<MapManager>();
@@ -17,15 +20,19 @@ public class EventManager
                 break;
 
             case NodeType.Rest:
-                // Slice 4: show RestPanel — stub completes immediately
-                mapManager.CompleteCurrentNode(nodeId);
+                ServiceLocator.Instance.Get<RunManager>()?.SetMode(RunMode.RestEvent);
                 break;
 
             default:
-                // Elite / Shop / RandomEvent — Slice 5 stub
+                // Elite / Shop / RandomEvent — Slice 6 stub
                 mapManager.CompleteCurrentNode(nodeId);
                 break;
         }
+    }
+
+    public void CompleteEvent()
+    {
+        OnEventCompleted?.Invoke();
     }
 
     private void StartCombat()
@@ -41,7 +48,6 @@ public class EventManager
             return;
         }
 
-        // Reset battle piles; HP and Deck persist across nodes
         localPlayer.BattleStart();
 
         CharacterInstance enemy = characterManager.CreateCharacter("Enemy1");

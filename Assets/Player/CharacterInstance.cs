@@ -59,6 +59,12 @@ public class CharacterInstance
         OnHPChanged?.Invoke(CurrentHP, characterData.MaxHP);
     }
 
+    public void Heal(int amount)
+    {
+        CurrentHP = Mathf.Min(CurrentHP + amount, characterData.MaxHP);
+        OnHPChanged?.Invoke(CurrentHP, characterData.MaxHP);
+    }
+
     public void BattleStart()
     {
         DeckController.BattleStart();

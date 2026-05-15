@@ -9,10 +9,11 @@ public class RunManager
     private UIManager _uiManager;
     public UIManager UIManager => _uiManager;
 
-    public void Initialize(IBattleManager battleManager, MapManager mapManager, CharacterInstance localPlayer)
+    public void Initialize(IBattleManager battleManager, MapManager mapManager, CharacterInstance localPlayer, EventManager eventManager)
     {
         battleManager.OnBattleEnd += HandleBattleEnd;
         mapManager.OnNodeSelected += HandleNodeSelected;
+        eventManager.OnEventCompleted += HandleEventCompleted;
         _mapManager = mapManager;
         _uiManager = ServiceLocator.Instance.Get<UIManager>();
         LocalPlayer = localPlayer;
@@ -44,6 +45,12 @@ public class RunManager
         {
             SetMode(RunMode.Defeat);
         }
+    }
+
+    private void HandleEventCompleted()
+    {
+        _mapManager?.CompleteCurrentNode(RunState.CurrentNodeId);
+        SetMode(RunMode.MapView);
     }
 
     private void HandleNodeSelected(string nodeId)

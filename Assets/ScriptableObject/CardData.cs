@@ -37,12 +37,14 @@ public class CardData : ScriptableObject
 {
     public string ID; // 卡牌的唯一識別碼，可以用來區分不同的卡牌
     public string Name; // 卡牌名稱
-    [TextArea] 
+    [TextArea]
     public string Description; // 卡牌描述
     public int Cost; // 卡牌消耗
     public CardType Type; // 卡牌類型
     public CardRarity Rarity; // 卡牌稀有度
     public PostUseAction PostUseAction; // 打出後卡片去向
+    // 是否可升級，升級前後數值定義在各 ICardEffect 的 upgraded 欄位
+    public bool CanUpgrade;
     // 存放效果列表
     [SerializeReference]
     public List<ICardEffect> Effects = new List<ICardEffect>();

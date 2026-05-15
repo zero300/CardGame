@@ -12,12 +12,23 @@ public class CardInstance
     /// 當前所需費用，因可能因為其他效果改變
     /// </summary>
     public int CurrentCost;
+    public bool IsUpgraded { get; private set; }
     public CharacterInstance Owner;
     public GameObject cardObject;
+
     public CardInstance(CardData cardData)
     {
         baseCardData = cardData;
         CurrentCost = cardData.Cost;
+    }
+
+    /// <summary>
+    /// 升級此卡，效果數值改為各 ICardEffect 的 upgraded 欄位值
+    /// </summary>
+    public void Upgrade()
+    {
+        if (!baseCardData.CanUpgrade || IsUpgraded) return;
+        IsUpgraded = true;
     }
     public void BindCardObject(GameObject cardObject)
     {
